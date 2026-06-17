@@ -107,3 +107,12 @@ Python · PyTorch · pandas · NumPy · Matplotlib · uv
 - Tune hyperparameters (window size, hidden size, number of layers, epochs).
 - Compare LSTM vs. GRU vs. vanilla RNN architectures.
 - Aggregate to monthly means for a smoother, less noisy signal.
+
+### Baseline Comparison
+
+A naive persistence baseline (predicting that tomorrow equals today) achieves
+an RMSE of **15.12**, slightly *better* than the LSTM (**15.30**). This is a
+known characteristic of one-step-ahead forecasting on noisy daily series: the
+last observed value is already a very strong predictor, and the naive baseline
+is notoriously hard to beat. The result highlights the importance of comparing
+any model against a trivial benchmark rather than judging it by its loss alone.
