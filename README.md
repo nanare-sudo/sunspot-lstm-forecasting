@@ -72,76 +72,10 @@ package management.
    `02_preprocessing_and_model.ipynb` (Run → Run All Cells). Each notebook is
    self-contained and reloads the data from `data/`.
 
-## Method
-
-|
- Step              
-|
- Choice                                                        
-|
-|
--------------------
-|
---------------------------------------------------------------
-|
-|
- Cleaning          
-|
- Remove rows with 
-`sunspots == -1`
-|
-|
- Train/test split  
-|
-**
-Chronological
-**
- 80 / 20 (no shuffling of the time series)  
-|
-|
- Normalization     
-|
- Min–max to [0, 1], 
-**
-fit on the training set only
-**
-|
-|
- Windowing         
-|
- Sliding window of 
-**
-30
-**
- days → predict the next day         
-|
-|
- Model             
-|
-`LSTM(input_size=1, hidden_size=50, num_layers=1)`
- + 
-`Linear(50, 1)`
-|
-|
- Loss / Optimizer  
-|
- MSE / Adam (
-`lr = 0.001`
-)                                     
-|
-|
- Batch size / Epochs 
-|
- 64 / 10                                                    
-|
-
-Splitting chronologically and fitting the scaler on the training data only are
-deliberate choices to avoid **data leakage** from the future into the model.
 
 ## Results
 
 - **RMSE:** ≈ 15.3 sunspots on the test set
-- **NRMSE:** … %  <!-- fill in your computed value and what it is normalized to -->
 
 The model tracks the multi-year solar cycles well across the entire test period.
 Sharp daily peaks are slightly underestimated — the model favors a smoother fit
@@ -154,9 +88,6 @@ that keeps the average error low, which is expected for noisy daily data.
 
 - Tune hyperparameters (window size, `hidden_size`, number of layers, epochs).
 - Try a GRU or a stacked / bidirectional architecture.
-- Smooth the signal by aggregating to monthly means for a cleaner, less noisy
-  target.
-- Forecast several steps ahead instead of a single day.
 
 ## Author
 
