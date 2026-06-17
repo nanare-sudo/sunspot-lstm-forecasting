@@ -1,94 +1,116 @@
-# dl-a2-2533110 — Time Series Forecasting of Sunspot Activity with an LSTM
+# Sunspot Time Series Forecasting with an LSTM
 
-Assignment 2 (Deep Learning) — forecasting the daily total sunspot number with a
-recurrent neural network (LSTM) implemented in PyTorch.
+A deep learning project that forecasts the daily total sunspot number using a
+Recurrent Neural Network (LSTM), built from scratch in PyTorch. Given the
+sunspot values of the past 30 days, the model predicts the value of the next day.
 
 ## Overview
 
-This project trains an LSTM to predict the **next day's** sunspot number from the
-**previous 30 days**. The full pipeline — data cleaning, preprocessing, model
-definition, training, and evaluation — is documented step by step in two Jupyter
-notebooks. The trained model reaches an **RMSE of ≈ 15.3 sunspots** on a held-out
-test set covering roughly the last 40 years of the record.
+The full pipeline – data cleaning, preprocessing, model design, training and
+evaluation – is implemented in PyTorch and documented in Jupyter notebooks.
+The project demonstrates a complete time series forecasting workflow, including
+chronological train/test splitting, leakage-free normalization, sliding-window
+sequence generation, and model evaluation with multiple metrics and plots.
 
 ## Dataset
 
-**Daily total sunspot number** from the SILSO World Data Center
-(file: `SN_d_tot_V2.0.csv`).
+- **Source:** https://www.sidc.be/SILSO/datafiles
+- **Range:** 1818-01-01 to 2026-05-31 (~76,000 daily records)
+- **Format:** semicolon-separated, 8 columns
+  (year, month, day, decimal date, sunspot number, std. deviation,
+  number of observations, definitive/provisional flag)
+- **Missing values:** marked as `-1` (~3,200 records, mostly early years),
+  removed during preprocessing.
 
-- Period: **1818 – 2026**, ~76,000 daily records
-- Format: semicolon-separated (`;`), **no header row**, 8 columns:
-  `year; month; day; decimal_date; sunspots; std_dev; n_observations; definitive`
-- The target variable is the **`sunspots`** column.
-- Missing measurements are encoded as **`-1`** (3,247 rows). These are removed
-  during preprocessing, leaving **72,875 valid daily values**.
+> **Note:** The dataset is **not** included in this repository (the `data/`
+> folder is git-ignored). Download `SN_d_tot_V2.0.csv` from SILSO and place it
+> in the `data/` folder before running the notebooks.
 
-> The dataset is **not** included in this repository (the `data/` folder is
-> git-ignored). Download `SN_d_tot_V2.0.csv` from the SILSO sunspot data files
-> and place it in the `data/` folder before running the notebooks.
+## Method
 
-## Project Structure
-
-```
-dl-a2-2533110/
-├── data/                 # raw dataset (not tracked in Git — add the CSV here)
-├── notebooks/
-│   ├── 01_data_exploration.ipynb      # loading, cleaning, visual inspection
-│   └── 02_preprocessing_and_model.ipynb  # preprocessing, model, training, evaluation
-├── models/
-│   └── sunspot_lstm.pth  # trained model weights (state_dict)
-├── figures/              # exported evaluation plots
-├── scripts/              # (unused — all code lives in the notebooks)
-├── pyproject.toml        # environment / dependencies (managed with uv)
-├── uv.lock               # exact pinned dependency versions
-├── .gitignore
-└── README.md
-```
-
-## Setup & How to Run
-
-This project uses [**uv**](https://docs.astral.sh/uv/) for environment and
-package management.
-
-1. **Clone the repository**
-   ```bash
-   git clone https://git.uni-wuppertal.de/2533110/dl-a2-2533110.git
-   cd dl-a2-2533110
-   ```
-
-2. **Add the dataset**
-   Download `SN_d_tot_V2.0.csv` and place it in the `data/` folder.
-
-3. **Install the environment**
-   ```bash
-   uv sync
-   ```
-
-4. **Launch Jupyter and run the notebooks in order**
-   ```bash
-   uv run jupyter lab
-   ```
-   Open and run `01_data_exploration.ipynb` first, then
-   `02_preprocessing_and_model.ipynb` (Run → Run All Cells). Each notebook is
-   self-contained and reloads the data from `data/`.
-
+1. **Cleaning** – remove missing values (`-1`), reset the index.
+2. **Split** – chronological 80/20 train/test split (no shuffling of the time
+   axis, to avoid data leakage).
+3. **Normalization** – Min-Max scaling to [0, 1]; min/max computed on the
+   **training data only** and applied to the test data.
+4. **Windowing** – sliding window of length 30: the past 30 days are the input,
+   the next day is the target.
+5. **Model** – single-layer LSTM (`hidden_size=50`) followed by a linear layer
+   that maps the last time step to one output value.
+6. **Training** – MSE loss, Adam optimizer (`lr=0.001`), batch size 64, 10 epochs.
 
 ## Results
 
-- **RMSE:** ≈ 15.3 sunspots on the test set
+- **RMSE:** ~15.3 sunspots on the unseen test set.
+- The model captures the ~11-year solar cycle across the whole test period.
+- Sharp daily peaks are slightly underestimated (the model smooths extremes),
+  which is expected for noisy daily data.
 
-The model tracks the multi-year solar cycles well across the entire test period.
-Sharp daily peaks are slightly underestimated — the model favors a smoother fit
-that keeps the average error low, which is expected for noisy daily data.
+### Forecast vs. Actual (full test set)
+![Forecast vs Actual](figures/01_forecast_full.png)
 
-![Forecast vs. Actual](figures/01_forecast_full.png)
-![Forecast vs. Actual (zoom)](figures/02_forecast_zoom.png)
+### Zoom – first 300 test days
+![Forecast Zoom](figures/02_forecast_zoom.png)
+
+### Predicted vs. Actual
+![Scatter](figures/03_scatter_pred_vs_actual.png)
+
+## Project Structure
+sunspot-lstm-forecasting/
+
+├── data/                # Dataset (not tracked – add the CSV here)
+
+├── notebooks/
+
+│   ├── 01_data_exploration.ipynb         # Loading, cleaning, visualization
+
+│   └── 02_preprocessing_and_model.ipynb  # Preprocessing, model, training, evaluation
+
+├── models/              # Saved trained model (sunspot_lstm.pth)
+
+├── figures/             # Saved evaluation plots
+
+├── pyproject.toml       # Dependencies (uv)
+
+├── uv.lock              # Locked dependency versions
+
+└── README.md
+
+
+## How to Run
+
+This project uses [uv](https://docs.astral.sh/uv/) for environment management.
+
+1. **Clone the repository**
+```bash
+   git clone https://github.com/DEIN-GITHUB-USER/sunspot-lstm-forecasting.git
+   cd sunspot-lstm-forecasting
+```
+
+2. **Add the dataset**
+   Download `SN_d_tot_V2.0.csv` from [SILSO](https://www.sidc.be/SILSO/datafiles)
+   and place it in the `data/` folder.
+
+3. **Install the environment**
+```bash
+   uv sync
+```
+
+4. **Launch Jupyter**
+```bash
+   uv run jupyter lab
+```
+
+5. **Run the notebooks** in order:
+   - `01_data_exploration.ipynb`
+   - `02_preprocessing_and_model.ipynb`
+
+## Tech Stack
+
+Python · PyTorch · pandas · NumPy · Matplotlib · uv
 
 ## Possible Improvements
 
-- Tune hyperparameters (window size, `hidden_size`, number of layers, epochs).
-- Try a GRU or a stacked / bidirectional architecture.
-
-## Author
-
-Leonardo Berisha — Student ID 2533110
+- Tune hyperparameters (window size, hidden size, number of layers, epochs).
+- Compare LSTM vs. GRU vs. vanilla RNN architectures.
+- Aggregate to monthly means for a smoother, less noisy signal.
