@@ -56,26 +56,19 @@ sequence generation, and model evaluation with multiple metrics and plots.
 ![Scatter](figures/03_scatter_pred_vs_actual.png)
 
 ## Project Structure
+
+```
 sunspot-lstm-forecasting/
-
 ├── data/                # Dataset (not tracked – add the CSV here)
-
 ├── notebooks/
-
 │   ├── 01_data_exploration.ipynb         # Loading, cleaning, visualization
-
 │   └── 02_preprocessing_and_model.ipynb  # Preprocessing, model, training, evaluation
-
 ├── models/              # Saved trained model (sunspot_lstm.pth)
-
 ├── figures/             # Saved evaluation plots
-
 ├── pyproject.toml       # Dependencies (uv)
-
 ├── uv.lock              # Locked dependency versions
-
 └── README.md
-
+```
 
 ## How to Run
 
@@ -83,7 +76,7 @@ This project uses [uv](https://docs.astral.sh/uv/) for environment management.
 
 1. **Clone the repository**
 ```bash
-   git clone https://github.com/DEIN-GITHUB-USER/sunspot-lstm-forecasting.git
+   git clone https://github.com/nanare-sudo/sunspot-lstm-forecasting.git
    cd sunspot-lstm-forecasting
 ```
 
